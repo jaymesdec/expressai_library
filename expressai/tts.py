@@ -4,6 +4,7 @@ import elevenlabs
 from elevenlabs import play
 import signal
 import sys
+import os
 
 # ✅ Detect if running in Google Colab
 try:
@@ -20,7 +21,8 @@ def speak_text(
     text,
     voice_id="JBFqnCBsd6RMkjVDRZzb",
     model_id="eleven_multilingual_v2",
-    output_format="pcm_44100",  # ✅ Raw format for Colab compatibility
+    output_format="mp3_44100_128",  # ✅ MP3 works for all tiers
+    filename="output.mp3",          # ✅ Default save filename
     autoplay=True
 ):
     """
@@ -31,6 +33,7 @@ def speak_text(
         voice_id (str): ElevenLabs voice ID.
         model_id (str): ElevenLabs model ID.
         output_format (str): Format of audio output.
+        filename (str): Path to save audio file.
         autoplay (bool): Whether to auto-play the result.
     """
     if not elevenlabs.api_key:
@@ -48,17 +51,22 @@ def speak_text(
         print(f"[TTS Error] {e}")
         return
 
+    try:
+        # ✅ Save audio to file
+        with open(filename, "wb") as f:
+            for chunk in audio:
+                f.write(chunk)
+    except Exception as e:
+        print(f"[File Save Error] {e}")
+        return
+
     if autoplay:
         try:
             if IN_COLAB:
-                # ✅ Convert generator to raw audio bytes
-                audio_bytes = b"".join(audio)
-                display(Audio(data=audio_bytes, autoplay=True, rate=44100))
+                display(Audio(filename, autoplay=True))
             else:
-                play(audio)
-        except KeyboardInterrupt:
-            print("\nAudio playback interrupted by user.")
+                play(filename)
         except Exception as e:
             print(f"[Audio Play Error] {e}")
     else:
-        print("✅ Audio generated (not played automatically).")
+        print(f"✅ Audio saved to {filename} (not played automatically).")
