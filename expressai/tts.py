@@ -13,25 +13,25 @@ try:
 except ImportError:
     IN_COLAB = False
 
-# Graceful interrupt
+# Graceful interrupt handler
 signal.signal(signal.SIGINT, lambda sig, frame: sys.exit(0))
 
 def speak_text(
     text,
     voice_id="JBFqnCBsd6RMkjVDRZzb",
     model_id="eleven_multilingual_v2",
-    output_format="mp3_44100_128",
+    output_format="pcm_44100",  # ✅ Raw format for Colab compatibility
     autoplay=True
 ):
     """
     Converts text to speech using ElevenLabs and plays it.
 
     Args:
-        text (str): Text to speak.
+        text (str): Text to convert.
         voice_id (str): ElevenLabs voice ID.
         model_id (str): ElevenLabs model ID.
-        output_format (str): Audio format.
-        autoplay (bool): Whether to play automatically.
+        output_format (str): Format of audio output.
+        autoplay (bool): Whether to auto-play the result.
     """
     if not elevenlabs.api_key:
         raise ValueError("Please set elevenlabs.api_key = 'your-api-key' before using speak_text.")
@@ -51,10 +51,9 @@ def speak_text(
     if autoplay:
         try:
             if IN_COLAB:
-                # ✅ Convert generator to bytes for Colab
-                from io import BytesIO
+                # ✅ Convert generator to raw audio bytes
                 audio_bytes = b"".join(audio)
-                display(Audio(BytesIO(audio_bytes), autoplay=True))
+                display(Audio(data=audio_bytes, autoplay=True, rate=44100))
             else:
                 play(audio)
         except KeyboardInterrupt:
