@@ -57,12 +57,11 @@ def speak_text(
     if autoplay:
         try:
             if IN_COLAB:
-                display(Audio(audio, autoplay=True))
+                from io import BytesIO
+                display(Audio(BytesIO(audio), autoplay=True))
             else:
                 play(audio)
         except KeyboardInterrupt:
             print("\nAudio playback interrupted by user.")
         except Exception as e:
             print(f"[Audio Play Error] {e}")
-    else:
-        print("✅ Audio generated (not played automatically).")
