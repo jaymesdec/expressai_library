@@ -5,22 +5,16 @@ from elevenlabs import play
 import signal
 import sys
 
-# Detect if running inside Google Colab
-IN_COLAB = "google.colab" in sys.modules
-if IN_COLAB:
+# ✅ Detect if running in Google Colab
+try:
+    import google.colab
+    IN_COLAB = True
     from IPython.display import Audio, display
+except ImportError:
+    IN_COLAB = False
 
-# Global variable to track if we should stop playback
-should_stop_playback = False
-
-def signal_handler(sig, frame):
-    global should_stop_playback
-    should_stop_playback = True
-    print("\nStopping audio playback...")
-    sys.exit(0)
-
-# Register the signal handler for graceful interruption
-signal.signal(signal.SIGINT, signal_handler)
+# Graceful interrupt
+signal.signal(signal.SIGINT, lambda sig, frame: sys.exit(0))
 
 def speak_text(
     text,
@@ -33,11 +27,11 @@ def speak_text(
     Converts text to speech using ElevenLabs and plays it.
 
     Args:
-        text (str): The input text to convert.
-        voice_id (str): The ElevenLabs voice ID.
-        model_id (str): The ElevenLabs model ID.
-        output_format (str): Audio format (e.g., mp3_44100_128).
-        autoplay (bool): Whether to play the audio automatically.
+        text (str): Text to speak.
+        voice_id (str): ElevenLabs voice ID.
+        model_id (str): ElevenLabs model ID.
+        output_format (str): Audio format.
+        autoplay (bool): Whether to play automatically.
     """
     if not elevenlabs.api_key:
         raise ValueError("Please set elevenlabs.api_key = 'your-api-key' before using speak_text.")
@@ -57,11 +51,15 @@ def speak_text(
     if autoplay:
         try:
             if IN_COLAB:
+                # ✅ Convert generator to bytes for Colab
                 from io import BytesIO
-                display(Audio(BytesIO(audio), autoplay=True))
+                audio_bytes = b"".join(audio)
+                display(Audio(BytesIO(audio_bytes), autoplay=True))
             else:
                 play(audio)
         except KeyboardInterrupt:
             print("\nAudio playback interrupted by user.")
         except Exception as e:
             print(f"[Audio Play Error] {e}")
+    else:
+        print("✅ Audio generated (not played automatically).")
