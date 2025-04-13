@@ -1,0 +1,4 @@
+openai>=1.14.0
+elevenlabs>=1.1.0
+pillow>=10.0.0
+IPython>=8.0.0
