@@ -1,4 +1,5 @@
-# expressai/chatbot.py (updated)
+# expressai/chatbot.py
+
 import openai
 import base64
 import os
@@ -13,6 +14,9 @@ try:
 except ImportError:
     IN_COLAB = False
 
+# ✅ Import TTS
+from .tts import speak_text
+
 class Chatbot:
     def __init__(self, system_prompt: str, model: str = "gpt-4o", max_tokens: int = 100, voice_id: str = None):
         self.system_prompt = system_prompt
@@ -21,7 +25,15 @@ class Chatbot:
         self.default_max_tokens = max_tokens
         self.voice_id = voice_id
 
-    def __call__(self, prompt: str = None, image: str = None, generate_image: bool = False, verbose: bool = False, max_tokens: int = None) -> str:
+    def __call__(
+        self,
+        prompt: str = None,
+        image: str = None,
+        generate_image: bool = False,
+        speak: bool = False,
+        verbose: bool = False,
+        max_tokens: int = None
+    ) -> str:
         client = openai.OpenAI(api_key=openai.api_key)
 
         if generate_image:
@@ -30,7 +42,12 @@ class Chatbot:
         if image:
             return self._analyze_image(client, prompt, image)
 
-        return self._chat(client, prompt, verbose, max_tokens)
+        response = self._chat(client, prompt, verbose, max_tokens)
+
+        if speak and self.voice_id:
+            speak_text(response, voice_id=self.voice_id)
+
+        return response
 
     def _chat(self, client, prompt, verbose, max_tokens):
         if not prompt:
