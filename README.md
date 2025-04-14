@@ -5,7 +5,7 @@ It empowers you to:
 
 - Create conversational AI chatbots with memory
 - Speak responses aloud using ElevenLabs voices
-- Analyze images with GPT-4o’s vision capabilities
+- Analyze images with GPT-4o's vision capabilities
 - Generate new images using DALL·E 3
 - Respond in different languages
 
@@ -29,15 +29,18 @@ Perfect for **teaching, workshops, project-based learning**, or anyone who wants
 ---
 
 ## 📦 Installation in Google Colab
+```python
 !pip install --upgrade --no-deps git+https://github.com/jaymesdec/expressai_library.git
 !pip install openai elevenlabs pillow
 import openai, elevenlabs
 openai.api_key = "sk-..."   # Your OpenAI API key
 elevenlabs.api_key = "sk-..."  # Your ElevenLabs API key
 from expressai import create_chatbot, speak_text
+```
 
 🧑‍🏫 Quick Examples
 1. Create a Chatbot
+```python
 from expressai import create_chatbot
 import openai
 
@@ -51,8 +54,10 @@ pirate_bot = create_chatbot(
 
 response = pirate_bot("Avast! What's the best treasure map strategy?")
 print("Bot says:", response)
+```
 
 2. Give the Chatbot a Voice
+```python
 import elevenlabs
 
 elevenlabs.api_key = "sk-..."  # ElevenLabs API key
@@ -67,31 +72,38 @@ pirate_bot = create_chatbot(
 # Ask it something and speak the answer
 answer = pirate_bot("Tell me about the biggest sea monster ye ever saw!", speak=True)
 print(answer)
+```
 This will generate text and save an audio file in output_audio/ with a unique timestamped filename.
 
 3. Respond in a Different Language
+```python
 answer_spanish = pirate_bot(
     "What is the nature of treasure hunting?",
     language="Spanish"
 )
 print(answer_spanish)
+```
 Here, your prompt gets prefixed with Please respond in Spanish. so the bot replies in Spanish.
 
 4. Analyze Images (Vision)
+```python
 caption = pirate_bot(
     "Describe this image from a scientific perspective.",
     image="sea_creature.jpg"
 )
 print("Bot's analysis:", caption)
-The bot sees the image and responds with GPT-4o’s vision capabilities. In Google Colab, just upload sea_creature.jpg to your workspace.
+```
+The bot sees the image and responds with GPT-4o's vision capabilities. In Google Colab, just upload sea_creature.jpg to your workspace.
 
 5. Generate an Image (DALL·E 2)
+```python
 file_path = pirate_bot(
     "Draw a treasure map with dragons and mountains",
     generate_image=True
 )
 print("Generated image saved to:", file_path)
-The image is displayed inline if you’re in Colab
+```
+The image is displayed inline if you're in Colab
 And a copy is saved to output_images/ with a name derived from your prompt
 
 🔊 ElevenLabs Voice Tips
