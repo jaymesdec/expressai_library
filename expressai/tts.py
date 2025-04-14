@@ -5,6 +5,7 @@ from elevenlabs import play
 import signal
 import sys
 import os
+from datetime import datetime
 
 # ✅ Detect if running in Google Colab
 try:
@@ -22,7 +23,7 @@ def speak_text(
     voice_id="JBFqnCBsd6RMkjVDRZzb",
     model_id="eleven_multilingual_v2",
     output_format="mp3_44100_128",  # ✅ MP3 works for all tiers
-    filename="output.mp3",          # ✅ Default save filename
+    filename=None,                  # ✅ Optional custom filename
     autoplay=True
 ):
     """
@@ -33,11 +34,17 @@ def speak_text(
         voice_id (str): ElevenLabs voice ID.
         model_id (str): ElevenLabs model ID.
         output_format (str): Format of audio output.
-        filename (str): Path to save audio file.
+        filename (str): Optional path to save audio file.
         autoplay (bool): Whether to auto-play the result.
     """
     if not elevenlabs.api_key:
         raise ValueError("Please set elevenlabs.api_key = 'your-api-key' before using speak_text.")
+
+    # ✅ Generate output path and filename
+    os.makedirs("output_audio", exist_ok=True)
+    if filename is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"output_audio/response_{timestamp}.mp3"
 
     try:
         client = elevenlabs.ElevenLabs(api_key=elevenlabs.api_key)
@@ -52,7 +59,6 @@ def speak_text(
         return
 
     try:
-        # ✅ Save audio to file
         with open(filename, "wb") as f:
             for chunk in audio:
                 f.write(chunk)
