@@ -30,6 +30,7 @@ class Chatbot:
         prompt: str = None,
         image: str = None,
         generate_image: bool = False,
+        language: str = None,
         speak: bool = False,
         verbose: bool = False,
         max_tokens: int = None
@@ -41,6 +42,9 @@ class Chatbot:
 
         if image:
             return self._analyze_image(client, prompt, image)
+
+        if language:
+            prompt = f"Please respond in {language}.\n{prompt}"
 
         response = self._chat(client, prompt, verbose, max_tokens)
 
