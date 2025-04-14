@@ -111,12 +111,11 @@ Find or create voices in ElevenLabs.
 Copy the Voice ID from your dashboard.
 Pass it as voice_id when creating a chatbot.
 
-Example Voice IDs:
-
-Character	Voice ID
-Feynman	dDO88mp6NlmgMvxIk8kV
-Pirate	Myn1LuZgd2qPMOg9BNtC
-Herzog	N9Q6FLY8ILw7lPey10SP
+| Character | Voice ID |
+|-----------|----------|
+| Feynman   | dDO88mp6NlmgMvxIk8kV |
+| Pirate    | Myn1LuZgd2qPMOg9BNtC |
+| Herzog    | N9Q6FLY8ILw7lPey10SP |
 
 🛠 Requirements
 Python 3.8+
