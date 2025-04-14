@@ -1,93 +1,135 @@
 # 🧠 expressai
 
-**expressai** is a creative Python library for expressive AI-based projects in chat, vision, and voice.  
-It’s designed to make powerful AI tools feel accessible, engaging, and playful—perfect for learning, prototyping, and teaching.
+**expressai** is a creative Python library for expressive AI-based projects in **chat**, **vision**, and **voice**.  
+It empowers you to:
 
-Created for workshops, classrooms, and creative developers.
+- Create conversational AI chatbots with memory
+- Speak responses aloud using ElevenLabs voices
+- Analyze images with GPT-4o’s vision capabilities
+- Generate new images using DALL·E 3
+- Respond in different languages
+
+Perfect for **teaching, workshops, project-based learning**, or anyone who wants to explore the expressive potential of AI in a simple, straightforward way.
 
 ---
 
 ## ✨ Features
 
-- 🧑‍🏫 **Create AI chatbots** with custom personalities and memory
-- 🖼️ **Analyze images** using OpenAI’s GPT-4o vision capabilities
-- 🔊 **Speak responses aloud** with realistic ElevenLabs text-to-speech
-- 🎛️ Thoughtfully designed for use in Google Colab and student-friendly settings
+1. **Chat Mode**  
+   Create chatbots with distinct personalities.
+2. **Voice Support**  
+   Give each bot a voice and speak responses out loud using ElevenLabs.
+3. **Image Analysis**  
+   Show a bot an image, and it will describe or analyze it using GPT-4o.
+4. **Image Generation**  
+   Ask a bot to generate an image with DALL·E 2 and display/save the result.
+5. **Multilingual**  
+   Request responses in a specific language with a simple command.
 
 ---
 
 ## 📦 Installation
 
-### 📍 Local (for development)
+### 📍 For Google Colab
 
-```bash
-git clone https://github.com/jaymesdec/expressai.git
-cd expressai
-pip install -e .
-📍 Google Colab (quick setup)
-In your first code cell:
+```python
+!pip install --upgrade --no-deps git+https://github.com/jaymesdec/expressai_library.git
+!pip install openai elevenlabs pillow
 
-!pip install openai elevenlabs pillow ipython
-
-Then:
+import openai, elevenlabs
+openai.api_key = "sk-..."   # Your OpenAI API key
+elevenlabs.api_key = "sk-..."  # Your ElevenLabs API key
 
 from expressai import create_chatbot, speak_text
 
-🧪 Quick Examples
-
-🤖 Create a chatbot
-import openai
+🧑‍🏫 Quick Examples
+1. Create a Chatbot
 from expressai import create_chatbot
+import openai
 
-openai.api_key = "sk-..."  # Set your OpenAI API key
+openai.api_key = "sk-..."  # OpenAI API key
 
-bot = create_chatbot(
-    system_prompt="You are a friendly pirate who answers in rhymes.",
+# A friendly pirate chatbot
+pirate_bot = create_chatbot(
+    system_prompt="You are a helpful pirate who always talks like a sea captain.",
     model="gpt-4o"
 )
 
-print(bot("What is the square root of 16?"))
+response = pirate_bot("Avast! What's the best treasure map strategy?")
+print("Bot says:", response)
 
-🖼️ Show a chatbot an image
-
-description = bot("Describe this image like a scientist.", image="my_photo.jpg")
-print(description)
-
-🔊 Speak the output
-
+2. Give the Chatbot a Voice
 import elevenlabs
-from expressai import speak_text
 
-elevenlabs.api_key = "sk-..."  # Your ElevenLabs key
+elevenlabs.api_key = "sk-..."  # ElevenLabs API key
 
-speak_text("The stars are not silent—they sing in fusion.")
+# Create a bot with a voice ID
+pirate_bot = create_chatbot(
+    system_prompt="You are a jolly pirate who loves to tell sea stories.",
+    model="gpt-4o",
+    voice_id="Myn1LuZgd2qPMOg9BNtC"  # Example voice ID
+)
 
-________ADD LIST OF VOICE IDs___________
+# Ask it something and speak the answer
+answer = pirate_bot("Tell me about the biggest sea monster ye ever saw!", speak=True)
+print(answer)
+This will generate text and save an audio file in output_audio/ with a unique timestamped filename.
 
-🔐 API Keys Required
-To use this library, you’ll need:
-An OpenAI API key
-An ElevenLabs API key
-Set them in your notebook or script:
+3. Respond in a Different Language
+answer_spanish = pirate_bot(
+    "What is the nature of treasure hunting?",
+    language="Spanish"
+)
+print(answer_spanish)
+Here, your prompt gets prefixed with Please respond in Spanish. so the bot replies in Spanish.
 
-openai.api_key = "your-openai-key"
-elevenlabs.api_key = "your-elevenlabs-key"
+4. Analyze Images (Vision)
+caption = pirate_bot(
+    "Describe this image from a scientific perspective.",
+    image="sea_creature.jpg"
+)
+print("Bot's analysis:", caption)
+The bot sees the image and responds with GPT-4o’s vision capabilities. In Google Colab, just upload sea_creature.jpg to your workspace.
 
-🛠️ Requirements
+5. Generate an Image (DALL·E 2)
+file_path = pirate_bot(
+    "Draw a treasure map with dragons and mountains",
+    generate_image=True
+)
+print("Generated image saved to:", file_path)
+The image is displayed inline if you’re in Colab
+And a copy is saved to output_images/ with a name derived from your prompt
+
+🔊 ElevenLabs Voice Tips
+Find or create voices in ElevenLabs.
+Copy the Voice ID from your dashboard.
+Pass it as voice_id when creating a chatbot.
+
+Example Voice IDs:
+
+Character	Voice ID
+Feynman	dDO88mp6NlmgMvxIk8kV
+Pirate	Myn1LuZgd2qPMOg9BNtC
+Herzog	N9Q6FLY8ILw7lPey10SP
+
+🛠 Requirements
 Python 3.8+
-openai ≥ 1.14.0
-elevenlabs ≥ 1.1.0
-pillow ≥ 10.0.0
-ipython ≥ 8.0.0
+openai >= 1.14.0
+elevenlabs >= 1.1.0
+pillow >= 10.0.0
 
-Install dependencies with:
+🧠 Educator Notes
+Encourage students to experiment with prompts and see how tone or language changes the results.
 
-pip install -r requirements.txt
+Use voice to make the interaction more playful and accessible.
 
-🧑‍🎓 For Educators and Students
-expressai was designed to be expressive, intuitive, and empowering for learners. 
+Combining image analysis and generation can spark creativity (e.g., analyze a real photo, then generate a fictional variation).
+
+The logs in output_audio/ and output_images/ can be shared or reviewed.
 
 🪪 License
 MIT License
-Created by Jaymes Dec
+Created by Jaymes Dec (with massive help from chatGPT)
 
+Contributions welcome!
+Enjoy exploring the expressive possibilities of AI with expressai.
