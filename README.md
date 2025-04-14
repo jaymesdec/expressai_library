@@ -38,8 +38,9 @@ elevenlabs.api_key = "sk-..."  # Your ElevenLabs API key
 from expressai import create_chatbot, speak_text
 ```
 
-🧑‍🏫 Quick Examples
-1. Create a Chatbot
+## 🧑‍🏫 Quick Examples
+
+## Create a Chatbot
 ```python
 from expressai import create_chatbot
 import openai
@@ -56,7 +57,7 @@ response = pirate_bot("Avast! What's the best treasure map strategy?")
 print("Bot says:", response)
 ```
 
-2. Give the Chatbot a Voice
+## Give the Chatbot a Voice
 ```python
 import elevenlabs
 
@@ -75,7 +76,7 @@ print(answer)
 ```
 This will generate text and save an audio file in output_audio/ with a unique timestamped filename.
 
-3. Respond in a Different Language
+## Respond in a Different Language
 ```python
 answer_spanish = pirate_bot(
     "What is the nature of treasure hunting?",
@@ -85,7 +86,7 @@ print(answer_spanish)
 ```
 Here, your prompt gets prefixed with Please respond in Spanish. so the bot replies in Spanish.
 
-4. Analyze Images (Vision)
+## Analyze Images (Vision)
 ```python
 caption = pirate_bot(
     "Describe this image from a scientific perspective.",
@@ -95,7 +96,7 @@ print("Bot's analysis:", caption)
 ```
 The bot sees the image and responds with GPT-4o's vision capabilities. In Google Colab, just upload sea_creature.jpg to your workspace.
 
-5. Generate an Image (DALL·E 2)
+## Generate an Image (DALL·E 2)
 ```python
 file_path = pirate_bot(
     "Draw a treasure map with dragons and mountains",
@@ -106,7 +107,7 @@ print("Generated image saved to:", file_path)
 The image is displayed inline if you're in Colab
 And a copy is saved to output_images/ with a name derived from your prompt
 
-🔊 ElevenLabs Voice Tips
+## ElevenLabs Voice Tips
 Find or create voices in ElevenLabs.
 Copy the Voice ID from your dashboard.
 Pass it as voice_id when creating a chatbot.
@@ -117,13 +118,13 @@ Pass it as voice_id when creating a chatbot.
 | Pirate    | Myn1LuZgd2qPMOg9BNtC |
 | Herzog    | N9Q6FLY8ILw7lPey10SP |
 
-🛠 Requirements
+## 🛠 Requirements
 Python 3.8+
 openai >= 1.14.0
 elevenlabs >= 1.1.0
 pillow >= 10.0.0
 
-🧠 Educator Notes
+## 🧠 Educator Notes
 Encourage students to experiment with prompts and see how tone or language changes the results.
 
 Use voice to make the interaction more playful and accessible.
@@ -132,7 +133,7 @@ Combining image analysis and generation can spark creativity (e.g., analyze a re
 
 The logs in output_audio/ and output_images/ can be shared or reviewed.
 
-🪪 License
+## 🪪 License
 MIT License
 Created by Jaymes Dec (with massive help from chatGPT)
 
