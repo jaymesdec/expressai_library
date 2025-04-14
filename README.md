@@ -28,18 +28,12 @@ Perfect for **teaching, workshops, project-based learning**, or anyone who wants
 
 ---
 
-## 📦 Installation
-
-### 📍 For Google Colab
-
-```python
+## 📦 Installation in Google Colab
 !pip install --upgrade --no-deps git+https://github.com/jaymesdec/expressai_library.git
 !pip install openai elevenlabs pillow
-
 import openai, elevenlabs
 openai.api_key = "sk-..."   # Your OpenAI API key
 elevenlabs.api_key = "sk-..."  # Your ElevenLabs API key
-
 from expressai import create_chatbot, speak_text
 
 🧑‍🏫 Quick Examples
