@@ -1,28 +1,45 @@
 # expressai/chatbot.py
 import openai
 import base64
-from PIL import Image
 import os
+from expressai.tts import speak_text
 
 class Chatbot:
-    def __init__(self, system_prompt: str, model: str = "gpt-4o", max_tokens: int = 100):
+    def __init__(self, system_prompt: str, model: str = "gpt-4o", max_tokens: int = 100, voice_id: str = None):
+        """
+        Initialize the chatbot with a system prompt, model, default max_tokens, and optional voice_id.
+        """
         self.system_prompt = system_prompt
         self.model = model
         self.history = []
         self.default_max_tokens = max_tokens
+        self.voice_id = voice_id
 
-    def __call__(self, prompt: str = None, image: str = None, verbose: bool = False, max_tokens: int = None) -> str:
+    def __call__(self, prompt: str = None, image: str = None, verbose: bool = False, max_tokens: int = None, speak: bool = False) -> str:
+        """
+        Send a message to the chatbot and receive a response.
+
+        Args:
+            prompt (str): User prompt or question.
+            image (str): Optional image file path (for GPT-4o vision input).
+            verbose (bool): Whether to print the prompt being sent.
+            max_tokens (int): Optional override of default max_tokens.
+            speak (bool): If True and voice_id is set, plays the response using TTS.
+
+        Returns:
+            str: The assistant's response.
+        """
         try:
             client = openai.OpenAI(api_key=openai.api_key)
         except Exception as e:
             return f"[OpenAI client error: {e}]"
 
+        # Vision mode
         if image:
             if not prompt:
                 prompt = "What do you see in this image?"
 
             try:
-                image = self._resize_image_if_needed(image)
                 with open(image, "rb") as image_file:
                     base64_image = base64.b64encode(image_file.read()).decode("utf-8")
             except Exception as e:
@@ -46,61 +63,42 @@ class Chatbot:
                     model=self.model,
                     input=input_payload
                 )
-                return response.output_text.strip()
+                reply = response.output_text.strip()
             except Exception as e:
                 return f"[Image analysis error: {e}]"
 
-        else:
-            if not prompt:
-                return "[Error: You must provide a prompt when no image is given.]"
-
-            self.history.append({"role": "user", "content": prompt})
-            messages = [{"role": "system", "content": self.system_prompt}] + self.history
-
-            if verbose:
-                for msg in messages:
-                    print(f"{msg['role'].capitalize()}: {msg['content']}")
-
-            try:
-                response = client.chat.completions.create(
-                    model=self.model,
-                    messages=messages,
-                    max_tokens=max_tokens if max_tokens is not None else self.default_max_tokens
-                )
-                reply = response.choices[0].message.content.strip()
-            except Exception as e:
-                reply = f"[Chat error: {e}]"
-
-            self.history.append({"role": "assistant", "content": reply})
+            if speak and self.voice_id:
+                speak_text(reply, voice_id=self.voice_id)
             return reply
 
-    def _resize_image_if_needed(self, image_path: str, max_short_side: int = 768) -> str:
-        """
-        Resize image if the short side is greater than max_short_side.
-        Returns the path to the resized image (or original if no change).
-        """
-        with Image.open(image_path) as img:
-            width, height = img.size
-            short_side = min(width, height)
+        # Regular chat mode
+        if not prompt:
+            return "[Error: You must provide a prompt when no image is given.]"
 
-            if short_side <= max_short_side:
-                return image_path  # No resize needed
+        self.history.append({"role": "user", "content": prompt})
+        messages = [{"role": "system", "content": self.system_prompt}] + self.history
 
-            # Maintain aspect ratio
-            if width < height:
-                new_width = max_short_side
-                new_height = int((max_short_side / width) * height)
-            else:
-                new_height = max_short_side
-                new_width = int((max_short_side / height) * width)
+        if verbose:
+            print("🧠 Prompt sent to model:")
+            for msg in messages:
+                print(f"{msg['role'].capitalize()}: {msg['content']}")
 
-            resized_img = img.resize((new_width, new_height), Image.LANCZOS)
+        try:
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                max_tokens=max_tokens if max_tokens is not None else self.default_max_tokens
+            )
+            reply = response.choices[0].message.content.strip()
+        except Exception as e:
+            reply = f"[Chat error: {e}]"
 
-            # Save resized image with suffix
-            base, ext = os.path.splitext(image_path)
-            resized_path = f"{base}_resized{ext}"
-            resized_img.save(resized_path)
-            return resized_path
+        self.history.append({"role": "assistant", "content": reply})
+
+        if speak and self.voice_id:
+            speak_text(reply, voice_id=self.voice_id)
+
+        return reply
 
     def reset(self):
         self.history = []
@@ -110,5 +108,6 @@ class Chatbot:
             f"<Chatbot model={self.model} "
             f"prompt={self.system_prompt[:30]}... "
             f"turns={len(self.history) // 2} "
-            f"default_max_tokens={self.default_max_tokens}>"
+            f"default_max_tokens={self.default_max_tokens} "
+            f"voice_id={self.voice_id}>"
         )
