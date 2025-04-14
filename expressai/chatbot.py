@@ -1,20 +1,17 @@
 # expressai/chatbot.py (updated)
-
 import openai
 import base64
 import os
 from PIL import Image
 from io import BytesIO
-import uuid
 
+# ✅ Detect Colab for inline image/audio support
 try:
     import google.colab
-    from IPython.display import display, Image as ColabImage, Audio as ColabAudio
+    from IPython.display import display, Image as ColabImage
     IN_COLAB = True
 except ImportError:
     IN_COLAB = False
-
-from expressai.tts import speak_text  # Make sure this handles return_audio=True
 
 class Chatbot:
     def __init__(self, system_prompt: str, model: str = "gpt-4o", max_tokens: int = 100, voice_id: str = None):
@@ -24,7 +21,7 @@ class Chatbot:
         self.default_max_tokens = max_tokens
         self.voice_id = voice_id
 
-    def __call__(self, prompt: str = None, image: str = None, generate_image: bool = False, speak: bool = False, save_audio: bool = False, verbose: bool = False, max_tokens: int = None) -> str:
+    def __call__(self, prompt: str = None, image: str = None, generate_image: bool = False, verbose: bool = False, max_tokens: int = None) -> str:
         client = openai.OpenAI(api_key=openai.api_key)
 
         if generate_image:
@@ -33,20 +30,7 @@ class Chatbot:
         if image:
             return self._analyze_image(client, prompt, image)
 
-        response = self._chat(client, prompt, verbose, max_tokens)
-
-        if speak and self.voice_id:
-            audio = speak_text(response, voice_id=self.voice_id, autoplay=not save_audio, return_audio=save_audio)
-            if save_audio and audio:
-                filename = f"output_audio/{uuid.uuid4().hex}.mp3"
-                os.makedirs("output_audio", exist_ok=True)
-                with open(filename, "wb") as f:
-                    f.write(audio)
-                if IN_COLAB:
-                    display(ColabAudio(filename))
-                return filename
-
-        return response
+        return self._chat(client, prompt, verbose, max_tokens)
 
     def _chat(self, client, prompt, verbose, max_tokens):
         if not prompt:
@@ -90,7 +74,10 @@ class Chatbot:
                         "role": "user",
                         "content": [
                             {"type": "text", "text": prompt},
-                            {"type": "image_url", "image_url": f"data:image/jpeg;base64,{base64_image}"}
+                            {
+                                "type": "image_url",
+                                "image_url": f"data:image/jpeg;base64,{base64_image}"
+                            },
                         ]
                     }
                 ]
@@ -113,6 +100,7 @@ class Chatbot:
         except Exception as e:
             return f"[Image generation error: {e}]"
 
+        # Save image locally and display in Colab
         try:
             import requests
             os.makedirs("output_images", exist_ok=True)
