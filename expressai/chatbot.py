@@ -2,76 +2,37 @@
 import openai
 import base64
 import os
-from expressai.tts import speak_text
+from PIL import Image
+from io import BytesIO
+
+# ✅ Detect Colab for inline image/audio support
+try:
+    import google.colab
+    from IPython.display import display, Image as ColabImage
+    IN_COLAB = True
+except ImportError:
+    IN_COLAB = False
 
 class Chatbot:
     def __init__(self, system_prompt: str, model: str = "gpt-4o", max_tokens: int = 100, voice_id: str = None):
-        """
-        Initialize the chatbot with a system prompt, model, default max_tokens, and optional voice_id.
-        """
         self.system_prompt = system_prompt
         self.model = model
         self.history = []
         self.default_max_tokens = max_tokens
         self.voice_id = voice_id
 
-    def __call__(self, prompt: str = None, image: str = None, verbose: bool = False, max_tokens: int = None, speak: bool = False) -> str:
-        """
-        Send a message to the chatbot and receive a response.
+    def __call__(self, prompt: str = None, image: str = None, generate_image: bool = False, verbose: bool = False, max_tokens: int = None) -> str:
+        client = openai.OpenAI(api_key=openai.api_key)
 
-        Args:
-            prompt (str): User prompt or question.
-            image (str): Optional image file path (for GPT-4o vision input).
-            verbose (bool): Whether to print the prompt being sent.
-            max_tokens (int): Optional override of default max_tokens.
-            speak (bool): If True and voice_id is set, plays the response using TTS.
+        if generate_image:
+            return self._generate_image(prompt)
 
-        Returns:
-            str: The assistant's response.
-        """
-        try:
-            client = openai.OpenAI(api_key=openai.api_key)
-        except Exception as e:
-            return f"[OpenAI client error: {e}]"
-
-        # Vision mode
         if image:
-            if not prompt:
-                prompt = "What do you see in this image?"
+            return self._analyze_image(client, prompt, image)
 
-            try:
-                with open(image, "rb") as image_file:
-                    base64_image = base64.b64encode(image_file.read()).decode("utf-8")
-            except Exception as e:
-                return f"[Image load error: {e}]"
+        return self._chat(client, prompt, verbose, max_tokens)
 
-            input_payload = [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "input_text", "text": prompt},
-                        {
-                            "type": "input_image",
-                            "image_url": f"data:image/jpeg;base64,{base64_image}",
-                        },
-                    ],
-                }
-            ]
-
-            try:
-                response = client.responses.create(
-                    model=self.model,
-                    input=input_payload
-                )
-                reply = response.output_text.strip()
-            except Exception as e:
-                return f"[Image analysis error: {e}]"
-
-            if speak and self.voice_id:
-                speak_text(reply, voice_id=self.voice_id)
-            return reply
-
-        # Regular chat mode
+    def _chat(self, client, prompt, verbose, max_tokens):
         if not prompt:
             return "[Error: You must provide a prompt when no image is given.]"
 
@@ -79,7 +40,6 @@ class Chatbot:
         messages = [{"role": "system", "content": self.system_prompt}] + self.history
 
         if verbose:
-            print("🧠 Prompt sent to model:")
             for msg in messages:
                 print(f"{msg['role'].capitalize()}: {msg['content']}")
 
@@ -94,11 +54,65 @@ class Chatbot:
             reply = f"[Chat error: {e}]"
 
         self.history.append({"role": "assistant", "content": reply})
-
-        if speak and self.voice_id:
-            speak_text(reply, voice_id=self.voice_id)
-
         return reply
+
+    def _analyze_image(self, client, prompt, image_path):
+        if not prompt:
+            prompt = "What do you see in this image?"
+
+        try:
+            with open(image_path, "rb") as img_file:
+                base64_image = base64.b64encode(img_file.read()).decode("utf-8")
+        except Exception as e:
+            return f"[Image load error: {e}]"
+
+        try:
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": f"data:image/jpeg;base64,{base64_image}"
+                            },
+                        ]
+                    }
+                ]
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            return f"[Image analysis error: {e}]"
+
+    def _generate_image(self, prompt):
+        try:
+            client = openai.OpenAI(api_key=openai.api_key)
+            response = client.images.generate(
+                model="dall-e-2",
+                prompt=prompt,
+                size="1024x1024",
+                quality="standard",
+                n=1
+            )
+            image_url = response.data[0].url
+        except Exception as e:
+            return f"[Image generation error: {e}]"
+
+        # Save image locally and display in Colab
+        try:
+            import requests
+            os.makedirs("output_images", exist_ok=True)
+            filename = f"output_images/{prompt[:40].replace(' ', '_').replace('.', '')}.png"
+            img_data = requests.get(image_url).content
+            with open(filename, 'wb') as handler:
+                handler.write(img_data)
+            if IN_COLAB:
+                display(ColabImage(filename))
+            return filename
+        except Exception as e:
+            return f"[Error saving or displaying image: {e}]"
 
     def reset(self):
         self.history = []
