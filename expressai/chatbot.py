@@ -51,21 +51,20 @@ class Chatbot:
     ) -> str:
         client = openai.OpenAI(api_key=openai.api_key)
 
-        if generate_image:
-            return self._generate_image(prompt)
-
-        if image:
-            return self._analyze_image(client, prompt, image)
-
         if language:
             prompt = f"Please respond in {language}.\n{prompt}"
 
-        response = self._chat(client, prompt, verbose, max_tokens)
+        if generate_image:
+            result = self._generate_image(prompt)
+        elif image:
+            result = self._analyze_image(client, prompt, image)
+        else:
+            result = self._chat(client, prompt, verbose, max_tokens)
 
-        if speak and self.voice_id:
-            speak_text(response, voice_id=self.voice_id)
+        if speak and isinstance(result, str) and self.voice_id:
+            speak_text(result, voice_id=self.voice_id)
 
-        return response
+        return result
 
     def _chat(self, client, prompt, verbose, max_tokens):
         if not prompt:
@@ -110,10 +109,10 @@ class Chatbot:
                         "content": [
                             {"type": "text", "text": prompt},
                             {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            }
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                }
                             },
                         ]
                     }
