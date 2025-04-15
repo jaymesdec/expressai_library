@@ -9,10 +9,24 @@ from io import BytesIO
 # ✅ Detect Colab for inline image/audio support
 try:
     import google.colab
-    from IPython.display import display, Image as ColabImage
+    from IPython.display import display, HTML, Image as ColabImage
+    from IPython import get_ipython
     IN_COLAB = True
 except ImportError:
     IN_COLAB = False
+
+# ✅ Inject custom CSS to wrap outputs in Colab
+if IN_COLAB:
+    def _set_output_wrapping():
+        display(HTML("""
+        <style>
+            pre {
+                white-space: pre-wrap;
+                word-break: break-word;
+            }
+        </style>
+        """))
+    get_ipython().events.register("pre_run_cell", _set_output_wrapping)
 
 # ✅ Import TTS
 from .tts import speak_text
