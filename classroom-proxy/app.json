@@ -1,0 +1,43 @@
+{
+  "name": "Classroom AI Proxy",
+  "description": "A kid-safe proxy that lets students use AI in Colab without an API key.",
+  "keywords": ["fastapi", "openai", "education", "proxy"],
+  "stack": "heroku-24",
+  "env": {
+    "OPENAI_API_KEY": {
+      "description": "Your REAL OpenAI API key. Held only on the server; students never see it.",
+      "required": true
+    },
+    "CLASSROOM_SECRET": {
+      "description": "Shared classroom password students type into their notebooks.",
+      "value": "change-me",
+      "required": true
+    },
+    "ALLOWED_MODEL": {
+      "description": "Model every request is forced to use (cost control).",
+      "value": "gpt-4o-mini",
+      "required": false
+    },
+    "MAX_TOKENS_CAP": {
+      "description": "Hard ceiling on max_tokens per request.",
+      "value": "400",
+      "required": false
+    },
+    "RATE_LIMIT_MAX": {
+      "description": "Max requests per student/IP within the window.",
+      "value": "15",
+      "required": false
+    },
+    "RATE_LIMIT_WINDOW": {
+      "description": "Rate-limit window in seconds.",
+      "value": "60",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  }
+}
