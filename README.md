@@ -8,8 +8,41 @@ It empowers you to:
 - Analyze images with GPT-4o's vision capabilities
 - Generate new images using DALL·E 3
 - Respond in different languages
+- **Route through a classroom proxy so students never need an API key** 🔐
 
 Perfect for **teaching, workshops, project-based learning**, or anyone who wants to explore the expressive potential of AI in a simple, straightforward way.
+
+---
+
+## 🔐 Kid-safe mode (classroom proxy)
+
+Giving raw `sk-...` keys to 13-year-olds in shared Colab notebooks is risky (leaks,
+runaway cost, ToS/FERPA/COPPA concerns). Instead, run the included **classroom proxy**
+(`classroom-proxy/`) which holds the real key server-side, and have students connect
+with a shared class password:
+
+```python
+import expressai
+
+bot = expressai.create_chatbot(
+    system_prompt="You are a friendly study buddy.",
+    base_url="https://your-proxy.herokuapp.com/v1",  # from your teacher
+    classroom_token="franklin-fall-2026",           # shared class password
+    student_id="alice",                              # for per-student rate limits
+)
+
+print(bot.ask("Explain what a variable is, simply."))
+```
+
+No API key ever appears in the notebook. The proxy forces a cheap model
+(`gpt-4o-mini`), caps `max_tokens`, and rate-limits each student. See
+[`classroom-proxy/README.md`](classroom-proxy/README.md) to deploy it, and
+[`examples/student_colab_notebook.ipynb`](examples/student_colab_notebook.ipynb)
+for a ready-to-run student notebook.
+
+**Adults / direct OpenAI use is unchanged** — just provide a key as before (set
+`openai.api_key`, the `OPENAI_API_KEY` env var, or pass `api_key=...`) and omit
+`base_url`.
 
 ---
 
