@@ -41,7 +41,7 @@ curl http://localhost:8000/health
 # A chat request (use the CLASSROOM_SECRET from your .env)
 curl -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer franklin-fall-2026" \
+  -H "Authorization: Bearer your-class-password" \
   -H "X-Student-ID: alice" \
   -d '{"messages":[{"role":"user","content":"Say hello like a pirate"}]}'
 
@@ -69,7 +69,7 @@ heroku create franklin-ai-proxy          # pick your own app name
 
 # Set secrets (students never see these)
 heroku config:set OPENAI_API_KEY=sk-your-real-key --app franklin-ai-proxy
-heroku config:set CLASSROOM_SECRET=franklin-fall-2026 --app franklin-ai-proxy
+heroku config:set CLASSROOM_SECRET=your-class-password --app franklin-ai-proxy
 # Optional overrides:
 # heroku config:set MAX_TOKENS_CAP=400 RATE_LIMIT_MAX=15 --app franklin-ai-proxy
 
@@ -78,7 +78,7 @@ git subtree push --prefix classroom-proxy heroku main
 
 # Make sure a web dyno is running, then health-check
 heroku ps:scale web=1 --app franklin-ai-proxy
-curl https://franklin-ai-proxy.herokuapp.com/health
+curl https://franklin-ai-proxy-c953cd639dde.herokuapp.com/health
 ```
 
 Notes:
@@ -94,8 +94,8 @@ Then give students the public URL + the classroom token. They connect with:
 ```python
 bot = expressai.create_chatbot(
     system_prompt="You are a friendly study buddy.",
-    base_url="https://franklin-ai-proxy.herokuapp.com/v1",  # note the /v1
-    classroom_token="franklin-fall-2026",
+    base_url="https://franklin-ai-proxy-c953cd639dde.herokuapp.com/v1",  # note the /v1
+    classroom_token="your-class-password",
     student_id="alice",
 )
 ```

@@ -12,8 +12,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from expressai import create_chatbot
 
 # 🏫 Values your teacher provides — no "sk-..." key required.
-PROXY_URL = "http://localhost:8000/v1"      # or your deployed proxy URL
-CLASSROOM_PASSWORD = "franklin-fall-2026"
+PROXY_URL = "https://franklin-ai-proxy-c953cd639dde.herokuapp.com/v1"  # your class proxy
+CLASSROOM_PASSWORD = "ASK-YOUR-TEACHER"     # <-- your teacher gives you this password
 MY_NAME = "alice"
 
 bot = create_chatbot(

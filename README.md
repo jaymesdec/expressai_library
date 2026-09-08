@@ -26,8 +26,8 @@ import expressai
 
 bot = expressai.create_chatbot(
     system_prompt="You are a friendly study buddy.",
-    base_url="https://your-proxy.herokuapp.com/v1",  # from your teacher
-    classroom_token="franklin-fall-2026",           # shared class password
+    base_url="https://franklin-ai-proxy-c953cd639dde.herokuapp.com/v1",  # your class proxy
+    classroom_token="ASK-YOUR-TEACHER",              # shared class password (from your teacher)
     student_id="alice",                              # for per-student rate limits
 )
 
