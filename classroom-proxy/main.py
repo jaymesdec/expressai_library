@@ -107,19 +107,19 @@ async def chat_completions(
     x_classroom_token: str = Header(default=""),
     x_student_id: str = Header(default=""),
 ):
-    # 1. Server misconfiguration guard
-    if client is None:
-        return JSONResponse(
-            status_code=500,
-            content={"error": {"message": "Proxy is missing OPENAI_API_KEY.", "type": "config_error"}},
-        )
-
-    # 2. Authentication
+    # 1. Authentication (first, so unauthenticated callers can't probe server state)
     token = _extract_token(authorization, x_classroom_token)
     if token != CLASSROOM_SECRET:
         return JSONResponse(
             status_code=401,
             content={"error": {"message": "Invalid or missing classroom token.", "type": "auth_error"}},
+        )
+
+    # 2. Server misconfiguration guard
+    if client is None:
+        return JSONResponse(
+            status_code=500,
+            content={"error": {"message": "Proxy is missing OPENAI_API_KEY.", "type": "config_error"}},
         )
 
     # 3. Rate limiting (per student if we know who they are, else per IP)
